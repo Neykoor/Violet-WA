@@ -1,5 +1,8 @@
 <h1 align='center'>Violet WA</h1>
 
+<img src="./assets/banner.png" alt="Violet WA" width="100%" />
+
+
 <div align='center'>Violet WA is a WebSockets-based TypeScript library for interacting with the WhatsApp Web API.</div>
 
 
