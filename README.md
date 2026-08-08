@@ -1,5 +1,3 @@
-<h1 align='center'>Violet WA</h1>
-
 <img src="./assets/banner.png" alt="Violet WA" width="100%" />
 
 
