@@ -241,14 +241,17 @@ export function makeLibSignalRepository(
 		async deleteSession(jids: string[]) {
 			if (!jids.length) return
 
-			// Convert JIDs to signal addresses and prepare for bulk deletion
 			const sessionUpdates: { [key: string]: null } = {}
-			jids.forEach(jid => {
-				const addr = jidToSignalProtocolAddress(jid)
-				sessionUpdates[addr.toString()] = null
-			})
+			for (const jid of jids) {
+				const addrStr = jidToSignalProtocolAddress(jid).toString()
+				sessionUpdates[addrStr] = null
 
-			// Single transaction for all deletions
+				const wireJid = await storage.resolveLIDSignalAddress(addrStr)
+				if (wireJid !== addrStr) {
+					sessionUpdates[wireJid] = null
+				}
+			}
+
 			return parsedKeys.transaction(async () => {
 				await auth.keys.set({ session: sessionUpdates })
 			}, `delete-${jids.length}-sessions`)
@@ -438,8 +441,8 @@ function signalStorage(
 	libsignal.SignalStorage & {
 		loadIdentityKey(id: string): Promise<Uint8Array | undefined>
 		saveIdentity(id: string, identityKey: Uint8Array): Promise<boolean>
+		resolveLIDSignalAddress(id: string): Promise<string>
 	} {
-	// Shared function to resolve PN signal address to LID if mapping exists
 	const resolveLIDSignalAddress = async (id: string): Promise<string> => {
 		if (id.includes('.')) {
 			const [deviceId, device] = id.split('.')
@@ -461,6 +464,7 @@ function signalStorage(
 	}
 
 	return {
+		resolveLIDSignalAddress,
 		loadSession: async (id: string) => {
 			try {
 				const wireJid = await resolveLIDSignalAddress(id)
@@ -552,4 +556,5 @@ function signalStorage(
 			}
 		}
 	}
-}
+						}
+		
