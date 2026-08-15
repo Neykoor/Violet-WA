@@ -42,6 +42,10 @@ export class SenderKeyRecord {
 	}
 
 	public addSenderKeyState(id: number, iteration: number, chainKey: Uint8Array, signatureKey: Uint8Array): void {
+		if (this.senderKeyStates.some(state => state.getKeyId() === id)) {
+			return
+		}
+
 		this.senderKeyStates.push(new SenderKeyState(id, iteration, chainKey, null, signatureKey))
 		if (this.senderKeyStates.length > this.MAX_STATES) {
 			this.senderKeyStates.shift()
@@ -66,4 +70,4 @@ export class SenderKeyRecord {
 		const parsed = JSON.parse(str, BufferJSON.reviver)
 		return new SenderKeyRecord(parsed)
 	}
-}
+	}
